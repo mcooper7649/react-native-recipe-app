@@ -1,24 +1,32 @@
-import { FavoritesContext } from '../store/context/favorites-context';
-import { Image, Text, View, StyleSheet, ScrollView } from 'react-native';
+import { useLayoutEffect } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
+import IconButton from '../components/IconButton';
+import List from '../components/MealDetail/List';
+import Subtitle from '../components/MealDetail/Subtitle';
 import MealDetails from '../components/MealDetails';
 import { MEALS } from '../data/dummy-data';
-import Subtitle from '../components/MealDetail/Subtitle';
-import List from '../components/MealDetail/List';
-import { useContext, useLayoutEffect } from 'react';
-import IconButton from '../components/Iconbutton';
+import { addFavorite, removeFavorite } from '../store/redux/favorites';
+// import { FavoritesContext } from '../store/context/favorites-context';
 
 function MealDetailsScreen({ route, navigation }) {
-  const favoriteMealsCtx = useContext(FavoritesContext);
+  // const favoriteMealsCtx = useContext(FavoritesContext);
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
+
   const mealId = route.params.mealId;
   const selectedMeal = MEALS.find((meal) => meal.id === mealId);
-  const mealIsFavorite =
-    favoriteMealsCtx === null ? '' : favoriteMealsCtx.ids.includes(mealId);
+
+  const mealIsFavorite = favoriteMealIds.includes(mealId);
 
   function changeFavoriteStatusHandler() {
     if (mealIsFavorite) {
-      favoriteMealsCtx.removeFavorite(mealId);
+      // favoriteMealsCtx.removeFavorite(mealId);
+      dispatch(removeFavorite({ id: mealId }));
     } else {
-      favoriteMealsCtx.addFavorite(mealId);
+      // favoriteMealsCtx.addFavorite(mealId);
+      dispatch(addFavorite({ id: mealId }));
     }
   }
 
@@ -40,7 +48,6 @@ function MealDetailsScreen({ route, navigation }) {
     <ScrollView style={styles.rootContainer}>
       <Image style={styles.image} source={{ uri: selectedMeal.imageUrl }} />
       <Text style={styles.title}>{selectedMeal.title}</Text>
-
       <MealDetails
         duration={selectedMeal.duration}
         complexity={selectedMeal.complexity}
@@ -70,6 +77,7 @@ const styles = StyleSheet.create({
     height: 350,
   },
   title: {
+    fontWeight: 'bold',
     fontSize: 24,
     margin: 8,
     textAlign: 'center',
@@ -78,10 +86,10 @@ const styles = StyleSheet.create({
   detailText: {
     color: 'white',
   },
-  listContainer: {
-    width: '80%',
-  },
   listOuterContainer: {
     alignItems: 'center',
+  },
+  listContainer: {
+    width: '80%',
   },
 });
